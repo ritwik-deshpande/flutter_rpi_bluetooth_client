@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter_blue_app/AppPage.dart';
 import 'package:flutter_blue_app/communication.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 
@@ -150,6 +151,15 @@ class _MainPage extends State<MainPage> {
             ),
           ],
         ),
+      ),
+    );
+  }
+  void _startApp(BuildContext context, BluetoothDevice server) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) {
+          return AppPage(server: server);
+        },
       ),
     );
   }
