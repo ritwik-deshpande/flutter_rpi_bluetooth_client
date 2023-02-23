@@ -61,6 +61,8 @@ class _MainPage extends State<MainPage> {
                     _startChat(context, _device);
                   } else {
                     print('Connect -> no device selected');
+                    _startApp(context, _device);
+
                   }
                 },
               ),
