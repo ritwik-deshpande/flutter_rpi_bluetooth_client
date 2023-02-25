@@ -5,13 +5,13 @@ import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 
 class AppPage extends StatefulWidget {
   final BluetoothDevice server;
+  double power = 50.0;
 
-  const AppPage({this.server});
+  AppPage({this.server});
 
   @override
   _AppPage createState() => new _AppPage();
 }
-
 
 class _AppPage extends State<AppPage> {
   BluetoothConnection connection;
@@ -19,8 +19,8 @@ class _AppPage extends State<AppPage> {
   String _messageBuffer = '';
   String message = "";
 
-
   bool isConnecting = true;
+
   bool get isConnected => connection != null && connection.isConnected;
 
   bool isDisconnecting = false;
@@ -73,47 +73,100 @@ class _AppPage extends State<AppPage> {
 
   @override
   Widget build(BuildContext context) {
-
     final Text command = Text(message);
 
     return Scaffold(
-      appBar: AppBar(
-          title: Text("Car Controls")),
+      appBar: AppBar(title: Text("Navigation Panel")),
       body: SafeArea(
-        child:Row(
-          children: <Widget>[
-            ElevatedButton(
-              child: const Text('A'),
-              onPressed: () {
-                _sendMessage("A");
-              },
-            ),
-            Column(
-              children: <Widget>[
-                command,
-                ElevatedButton(
-                  child: const Text('W'),
-                  onPressed: () {
-                    _sendMessage("A");
-                  },
+        child: Container(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                alignment: Alignment.center,
+                child: Column(
+                  // mainAxisSize: ,
+                  children: [
+                    Flex(
+                      mainAxisSize: MainAxisSize.min,
+                      direction: Axis.horizontal,
+                      children: [
+                        Flexible(
+                          child: Container(
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                CustomButton(Icons.arrow_back, "A", widget.power.round()),
+                                SizedBox(
+                                  width: 15,
+                                ),
+                                Flexible(
+                                  child: Container(
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        command,
+                                        // Button
+                                        CustomButton(Icons.arrow_upward, "W", widget.power.round()),
+                                        SizedBox(height: 110),
+                                        CustomButton(Icons.arrow_downward, "S", widget.power.round()),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(
+                                  width: 15,
+                                ),
+                                CustomButton(Icons.arrow_forward, "D", widget.power.round())
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
-                ElevatedButton(
-                  child: const Text('S'),
-                  onPressed: () {
-                    _sendMessage("B");
-                  },
-                ),
-              ],
-            ),
-            ElevatedButton(
-              child: const Text('D'),
-              onPressed: () {
-                _sendMessage("A");
-              },
-            ),
-          ],
+              ),
+              SizedBox(height: 50,),
+              Text("Power Value: " + widget.power.round().toString()),
+              Slider(
+                value: widget.power,
+                max: 100,
+                divisions: 5,
+                label: widget.power.round().toString(),
+                onChanged: (double value) {
+                  setState(() {
+                    widget.power = value;
+                  });
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 
-        )
+  GestureDetector CustomButton(IconData icon, String msg, int power) {
+    return GestureDetector(
+      onLongPress: () {
+        print("SDASDASd");
+        _sendMessage(msg, power);
+      },
+      onLongPressEnd: (details) {
+        _sendMessage("STOP", power);
+      },
+      child: Container(
+        height: 40,
+        width: 60,
+        decoration: BoxDecoration(
+            color: Colors.blueAccent, borderRadius: BorderRadius.circular(4.0)),
+        child: Icon(
+          icon,
+          color: Colors.white,
+        ),
       ),
     );
   }
@@ -148,12 +201,11 @@ class _AppPage extends State<AppPage> {
     int index = buffer.indexOf(13);
     if (~index != 0) {
       setState(() {
-        
         message = backspacesCounter > 0
-                ? _messageBuffer.substring(
-                    0, _messageBuffer.length - backspacesCounter)
-                : _messageBuffer + dataString.substring(0, index);
-        
+            ? _messageBuffer.substring(
+                0, _messageBuffer.length - backspacesCounter)
+            : _messageBuffer + dataString.substring(0, index);
+
         _messageBuffer = dataString.substring(index);
       });
     } else {
@@ -164,14 +216,13 @@ class _AppPage extends State<AppPage> {
     }
   }
 
-  void _sendMessage(String text) async {
+  void _sendMessage(String text, int power) async {
     text = text.trim();
 
     if (text.length > 0) {
       try {
-        connection.output.add(utf8.encode(text + "\r\n"));
+        connection.output.add(utf8.encode(text + "|" + power.toString() + "\r\n"));
         await connection.output.allSent;
-
       } catch (e) {
         // Ignore error, but notify state
         setState(() {});

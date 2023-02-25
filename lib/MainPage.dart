@@ -45,20 +45,22 @@ class _MainPage extends State<MainPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Chat Demo'),
+        title: const Text('Bluetooth RC App'),
       ),
       body: Container(
         child: ListView(
           children: <Widget>[
             Divider(),
-            ListTile(title: Text("Device: " + (_device == null? "..." : _device.name))),
+            ListTile(title: Text((_device == null? "no avaliable devices found" : "Device: " + _device.name))),
             ListTile(
               title: ElevatedButton(
-                child: const Text('Start Chat'),
+                child: const Text('CONNECT'),
                 onPressed: () async {
                   if (_device != null) {
                     print('Connect -> selected ' + _device.address);
-                    _startChat(context, _device);
+                    // _startChat(context, _device);
+                    _startApp(context, _device);
+
                   } else {
                     print('Connect -> no device selected');
                     _startApp(context, _device);
