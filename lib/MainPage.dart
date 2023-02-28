@@ -63,7 +63,7 @@ class _MainPage extends State<MainPage> {
 
                   } else {
                     print('Connect -> no device selected');
-                    _startApp(context, _device);
+                    // _startApp(context, _device);
 
                   }
                 },
